@@ -19,4 +19,4 @@ foreach ($formFields as $i) {
     }
 }
 
-$finalEmail = $emailContent[0] + $innerEmailContent + $emailContent[1];
+$finalEmail = $emailContent[0] + $innerEmailContent + $emailContent[1]; //send as email :)
