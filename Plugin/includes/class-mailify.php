@@ -346,16 +346,38 @@ class Mailify {
 	                    <input type="submit" id="search-submit" class="button" value="Search Forms">
                     </p>
                 </form>
+                <table class="form-table">
+                    <tbody>
+                    Copy the shortcode from the textboxe's to the right and paste anywhere on a page.
+                    <?php
+                        $directory = plugin_dir_path( __FILE__ ) . '/forms/';
+                        $scanned_directory = array_diff(scandir($directory), array('..', '.'));
+                        foreach ($scanned_directory as $dir => $value) {
+                            ?>
+                        <tr>
+                            <th scope="row"><label for="formname"><?php echo $value; ?></label></th>
+                            <td><input type="text"  value='[mailify id="<?php echo $value; ?>"]' class="regular-text" /></td>
+                        </tr>
+                            <?php
+                        }
+                    ?>
+                    </tbody>
+                </table>
             </div>
         </div>
         <?php
     }
     
-    public function createAdminPage() {
+    /**
+	 * Add Mailify admin create page.
+	 * @access  public
+	 * @since   1.0.0
+	 * @return  void
+	 */
+    public function createAdminPage() { //todo check if user is a admin
         if (isset($_POST['formname'])) {
-            //file_put_contents();
-            //$this -> insertWordpressContactForm($_POST['formname'], $_POST['formcode']);
             $this -> file_write_contents(plugin_dir_path( __FILE__ ) . '/forms/' . $_POST['formname'] . '.txt', $_POST['formcode']);
+            add_shortcode('mailify', $this -> mailify_tag(null, $_POST['formname']));
         }
         ?>
         <script><?php
@@ -409,8 +431,7 @@ class Mailify {
                                     fc.init();
                                 </script>
                                 <p class="description" id="form-code">The JSON for the form.</p></td>
-                            </tr> 
-                            
+                            </tr>
                             <tr>
                                 <th scope="row"></th>
                                 <td><input name="submit" type="submit" id="submit" value="Create" /></td>
@@ -421,6 +442,15 @@ class Mailify {
             </div>
         </div>
         <?php
+    }
+    
+    // [bartag foo="foo-value"]
+    private function mailify_tag($atts, $id) {
+        $a = shortcode_atts( array(
+            'id' => $id,
+        ), $atts);
+
+        return "id = {$a['id']}";
     }
     
     private function file_force_contents($dir, $contents){
