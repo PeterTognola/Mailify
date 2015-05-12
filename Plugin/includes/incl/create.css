@@ -1,0 +1,31 @@
+﻿body div.half {
+             width: 50%;
+             margin: 0;
+             padding: 0;
+             float: left;
+             display: inline-block;
+         }
+
+        body textarea.full {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            margin: 0;
+            padding: 0;
+            left: 0;
+            top: 0;
+        }
+
+        body div.half .fcFormObj .editArea {
+            width: 100%;
+            background: #E1E1E1;
+            height: 30px;
+            line-height: 30px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        body div.half .fcFormObj .editArea a {
+            color: #a52a2a;
+            text-decoration: none;
+        }

@@ -358,6 +358,13 @@ class Mailify {
             $this -> file_write_contents(plugin_dir_path( __FILE__ ) . '/forms/' . $_POST['formname'] . '.txt', $_POST['formcode']);
         }
         ?>
+        <script><?php
+            include 'incl/create.js'
+        ?></script>
+        
+        <style><?php
+            include 'incl/create.css'
+        ?></style>
         <div class="wrap">
             <h2>Mailify - Create Form <a href="?page=mailify-create" class="add-new-h2">Back</a></h2>
             <div>
@@ -382,7 +389,25 @@ class Mailify {
                             </tr> 
                             <tr>
                                 <th scope="row"><label for="formcode">Form Code</label></th>
-                                <td><textarea name="formcode" id="formcode" aria-describedby="form-code" style="width:60%; min-height:300px;" class="regular-text"><?php echo file_get_contents(plugin_dir_url( __FILE__ ) . '/example/full-form.txt'); ?></textarea>
+                                <td><div id="form_creator" class="half">
+                                    <select id="objects" name="objects">
+                                        <option value="text">text</option>
+                                        <option value="textbox">textbox</option>
+                                        <option value="email">email</option>
+                                        <option value="textarea">textarea</option>
+                                        <option value="checkbox">checkbox</option>
+                                        <option value="submit">submit</option>
+                                        <option value="hidden">hidden</option>
+                                    </select>
+                                    <input type="text" placeholder="label" id="label" name="label" />
+                                    <input type="button" value="create" onclick=" fc.createObj() "/>
+                                    <input type="button" value="export" onclick="fc.exportObj();" />
+                                    <textarea name="formcode" id="formcode" aria-describedby="form-code" style="width:100%; min-height:300px;" class="regular-text"></textarea>
+                                </div>
+                                <div id="form_creator_container" class="half"></div>
+                                <script>
+                                    fc.init();
+                                </script>
                                 <p class="description" id="form-code">The JSON for the form.</p></td>
                             </tr> 
                             

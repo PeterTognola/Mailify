@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <title>Editor</title>
     <script>
-        var fcContainer = "form_creator_container", fcRun = true, fcInputAttr = "class=\"class\"", fcLabelAttr = "class=\"stuff\"";
+        var fcContainer = "form_creator_container", fcRun = true, fcInputAttr = "class=\"regular-text\"", fcLabelAttr = "class=\"stuff\"";
 
         function _(id) {
             return document.getElementById(id) || document.getElementsByName(id) || document.getElementsByClassName(id);
@@ -24,7 +24,7 @@
             object: function (obj, name) {
                 var details = "";
                 if (obj && name) {
-                    details = "<input type=\"hidden\" value=\"" + obj + "\" class=\"detail_obj\" /><input type=\"hidden\" value=\"" + name + "\" class=\"detail_name\" />";
+                    details = "<input type=\"hidden\" value=\"" + obj + "\" class=\"detail_obj\" /><input type=\"hidden\" value=\"" + (name.length < 1 ? "_" : name) + "\" class=\"detail_name\" />";
                 }
                 switch (obj) {
                     case "text":
@@ -71,7 +71,6 @@
             exportObj: function() {
                 var formPart = document.querySelectorAll("#" + fcContainer + " > .fcFormObj");
                 var formParts = {};
-                var anotherParts = {};
 
                 formParts["fcForm" + Math.floor(Math.random() * 9) + 1] = ["formname", "#"];
 
