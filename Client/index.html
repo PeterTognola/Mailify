@@ -37,6 +37,8 @@
                         return details + "<label " + fcLabelAttr + ">" + name + "</label><textarea " + fcInputAttr + "></textarea>";
                     case "checkbox":
                         return details + "<input " + fcInputAttr + " type=\"checkbox\" /><label " + fcLabelAttr + ">" + name + "</label>";
+                    case "recaptcha":
+                        return details + "[reCaptcha will appear here]";
                     case "submit":
                         return details + "<input " + fcInputAttr + " type=\"submit\" value=" + name + " />";
                     case "hidden":
@@ -143,6 +145,7 @@
             <option value="email">email</option>
             <option value="textarea">textarea</option>
             <option value="checkbox">checkbox</option>
+            <option value="recaptcha">reCaptcha</option>
             <option value="submit">submit</option>
             <option value="hidden">hidden</option>
         </select>
@@ -152,7 +155,7 @@
     </div>
 
     <div id="form_creator_container" class="half"></div>
-
+        
     <script>
         fc.init();
     </script>
