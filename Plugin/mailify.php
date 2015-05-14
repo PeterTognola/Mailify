@@ -35,13 +35,29 @@ require_once( 'includes/lib/class-mailify-taxonomy.php' );
  * @return object Mailify
  */
 function Mailify () {
-	$instance = Mailify::instance( __FILE__, '1.0.0' );
+    $instance = Mailify::instance( __FILE__, '1.0.0' );
 
-	if ( is_null( $instance->settings ) ) {
-		$instance->settings = Mailify_Settings::instance( $instance );
-	}
+    if ( is_null( $instance->settings ) ) {
+        $instance->settings = Mailify_Settings::instance( $instance );
+    }
 
-	return $instance;
+    return $instance;
 }
 
 Mailify();
+
+function MailifyForm_Request() {
+    $MailifyForm = $_GET['MailifyForm'];
+    if (!isset($MailifyForm)) return;
+    $file = @file_get_contents('includes/forms' . $MailifyForm);
+    if (!empty($file)) {
+        echo $file;
+    } else {
+        echo 'ERROR: FORM NOT FOUND!';
+    }
+    exit();
+}
+
+MailifyForm_Request();
+
+?>
