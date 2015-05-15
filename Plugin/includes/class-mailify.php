@@ -352,8 +352,8 @@ class Mailify {
      */
     public function addAdminPage() {
         add_shortcode('mailify', 'mailify_tag');
-        if (shortcode_exists('mailify')) {
-            echo 'on';
+        if (!shortcode_exists('mailify')) {
+            echo 'ERROR: Shortcode not enabled, please enable in functions.php.';
         }
         $this -> addWordpressContactTable();
         if (isset($_GET['createForm'])) { $this -> createAdminPage(); return null; }
@@ -401,69 +401,10 @@ class Mailify {
             $this -> file_write_contents(plugin_dir_path( __FILE__ ) . '/forms/' . $_POST['formname'] . '.txt', $_POST['formcode']);
              //mailify_tag(explode(".", $_POST['formname'])[0])
         }
-        ?>
-        <script><?php
-            include 'incl/create.js'
-        ?></script>
+        /*<script> include 'incl/create.js'</script>
+        <style>include 'incl/create.css'; </style>*/
         
-        <style><?php
-            include 'incl/create.css'
-        ?></style>
-        <div class="wrap">
-            <h2>Mailify - Create Form <a href="?page=mailify-create" class="add-new-h2">Back</a></h2>
-            <div>
-                <form method="get">
-                    <p class="search-box">
-                        <label class="screen-reader-text" for="mailify-search-form">Search Forms:</label>
-                        <input type="search" id="mailify-search-form" name="s" value="">
-                        <input type="submit" id="search-submit" class="button" value="Search Forms">
-                    </p>
-                </form>
-                <form method="post">
-                    <table class="form-table">
-                        <tbody>
-                            <tr>
-                                <th scope="row"><label for="formname">Form Name</label></th>
-                                <td><input name="formname" type="text" id="formname" value="<?php echo $_GET['createForm']; ?>" class="regular-text"></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="formdescription">Form Description</label></th>
-                                <td><input name="formdescription" type="text" id="formdescription" aria-describedby="form-description" value="" class="regular-text">
-                                <p class="description" id="form-description">In a few words, explain what this form is about.</p></td>
-                            </tr> 
-                            <tr>
-                                <th scope="row"><label for="formcode">Form Code</label></th>
-                                <td><div id="form_creator" class="half">
-                                    <select id="objects" name="objects">
-                                        <option value="text">text</option>
-                                        <option value="textbox">textbox</option>
-                                        <option value="email">email</option>
-                                        <option value="textarea">textarea</option>
-                                        <option value="checkbox">checkbox</option>
-                                        <option value="submit">submit</option>
-                                        <option value="hidden">hidden</option>
-                                    </select>
-                                    <input type="text" placeholder="label" id="label" name="label" />
-                                    <input type="button" value="create" onclick=" fc.createObj() "/>
-                                    <input type="button" value="export" onclick="fc.exportObj();" />
-                                    <textarea name="formcode" id="formcode" aria-describedby="form-code" style="width:100%; min-height:300px;" class="regular-text"></textarea>
-                                </div>
-                                <div id="form_creator_container" class="half"></div>
-                                <script>
-                                    fc.init();
-                                </script>
-                                <p class="description" id="form-code">The JSON for the form.</p></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"></th>
-                                <td><input name="submit" type="submit" id="submit" value="Create" /></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </form>
-            </div>
-        </div>
-        <?php
+        include plugin_dir_path( __FILE__ ) . '/../assets/php/view-admin-panel.php';
     }
     
     //private function mailify_tag($atts) {

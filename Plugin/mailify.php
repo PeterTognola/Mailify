@@ -46,14 +46,21 @@ function Mailify () {
 
 Mailify();
 
+/**
+ * Returns the requested form or an error if unable to find.
+ *
+ * @since  1.0.0
+ * @return object MailifyForm_Request
+ */
 function MailifyForm_Request() {
     $MailifyForm = $_GET['MailifyForm'];
     if (!isset($MailifyForm)) return;
-    $file = @file_get_contents('includes/forms' . $MailifyForm);
+    $filePath = plugin_dir_path( __FILE__ ) . '/includes/forms/' . $MailifyForm . '.txt';
+    $file = @file_get_contents($filePath);
     if (!empty($file)) {
-        echo $file;
+        echo stripslashes($file);
     } else {
-        echo 'ERROR: FORM NOT FOUND!';
+        echo 'ERROR: FORM NOT FOUND - ' . $filePath;
     }
     exit();
 }

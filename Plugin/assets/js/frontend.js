@@ -9,7 +9,8 @@ var Mailify = {
     },
 
     request: function (id, element) { //Request said form server
-        Mailify._ajaxAction("form.php?formid=" + id, "GET", null, function () { Mailify.serve(element, Mailify_CurrentData); });
+        //Mailify._ajaxAction("form.php?formid=" + id, "GET", null, function () { Mailify.serve(element, Mailify_CurrentData); });
+        Mailify._ajaxAction("?MailifyForm=" + id, "GET", null, function () { Mailify.serve(element, Mailify_CurrentData); });
     },
 
     serve: function (element, data) { //display on page-ish
@@ -17,9 +18,11 @@ var Mailify = {
 
         var documentAdditions = "";
 
-        for (var id in form) {
-            if (form.hasOwnProperty(id)) {
-                documentAdditions += this.type(id, form[id]);
+        var formContent = Object.keys(form).map(function (k) { return form[k] });
+
+        for (var id in formContent) {
+            if (formContent.hasOwnProperty(id)) {
+            documentAdditions += this.type(formContent[id][0].toLowerCase(), formContent[id][1]);
             }
         }
 
@@ -28,19 +31,19 @@ var Mailify = {
 
     type: function (key, object) {
         switch (object[0]) {
-            case "Textbox":
+            case "textbox":
                 return "<div><label>" + object[1] + "</label><input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" " + object[2] + " /></div>";
-            case "Email":
+            case "email":
                 return "<div><label>" + object[1] + "</label><input type=\"email\" id=\"" + key + "\" name=\"" + key + "\" " + object[2] + " /></div>";
-            case "Textarea":
+            case "textarea":
                 return "<div><label>" + object[1] + "</label><textarea id=\"" + key + "\" name=\"" + key + "\" " + object[2] + "></textarea></div>";
-            case "Checkbox":
+            case "checkbox":
                 return "<div><input type=\"checkbox\" id=\"" + key + "\" name=\"" + key + "\" /><label>" + object[1] + "</label></div>";
-            case "FormName":
+            case "formName":
                 return "<div><form class=\"mailify\" id=\"" + key + "\" name=\"" + key + "\" method=\"POST\">";
-            case "Hidden":
+            case "hidden":
                 return "<input type=\"hidden\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" />";
-            case "Submit":
+            case "submit":
                 return "<div><input type=\"button\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" onclick=\"Mailify.submit('" + object[2].toString() + "')\" /></div>";
             default:
                 return "";

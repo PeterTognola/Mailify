@@ -98,7 +98,19 @@
                 //    anotherParts[a[o]] = formParts[a[o]];
                 //}
 
-                document.body.innerHTML = "<textarea class=\"full\">" + JSON.stringify(formParts) + "</textarea>";
+                //document.body.innerHTML = "<textarea class=\"full\">" + JSON.stringify(formParts) + "</textarea>";
+                _('formcode').innerHTML = JSON.stringify(formParts);
+            },
+
+            switchEle: function () {
+                switch (_("objects").options[_("objects").selectedIndex].value) {
+                    case "dropbox":
+                        _("plchlder-text").innerHTML = "<textarea id=\"label\" name=\"label\"></textarea>";
+                        break;
+                    default:
+                        _("plchlder-text").innerHTML = "<input type=\"text\" placeholder=\"label\" id=\"label\" name=\"label\" />";
+                        break;
+                }
             }
         };
     </script>
@@ -139,17 +151,18 @@
 </head>
 <body>
     <div id="form_creator" class="half">
-        <select id="objects" name="objects">
+        <select id="objects" onchange=" fc.switchEle(); " name="objects">
             <option value="text">text</option>
             <option value="textbox">textbox</option>
             <option value="email">email</option>
             <option value="textarea">textarea</option>
             <option value="checkbox">checkbox</option>
+            <option value="dropbox">dropbox</option>
             <option value="recaptcha">reCaptcha</option>
             <option value="submit">submit</option>
             <option value="hidden">hidden</option>
         </select>
-        <input type="text" placeholder="label" id="label" name="label" />
+        <div id="plchlder-text"><input type="text" placeholder="label" id="label" name="label" /></div>
         <input type="button" value="create" onclick=" fc.createObj() "/>
         <input type="button" value="export" onclick="fc.exportObj();" />
     </div>

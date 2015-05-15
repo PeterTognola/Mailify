@@ -1,0 +1,15 @@
+#mailifyContact-form {
+    
+}
+
+#mailifyContact-form div input[type="text"], #mailifyContact-form div input[type="email"] {
+    width: 100%;
+    height: 33px;
+    border: 1px solid #d2d2d2;
+}
+
+#mailifyContact-form div textarea {
+    width: 100%;
+    height: 150px;
+    border: 1px solid #d2d2d2;
+}

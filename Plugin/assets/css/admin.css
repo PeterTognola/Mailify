@@ -29,3 +29,7 @@ body div.half .fcFormObj .editArea a {
     color: #a52a2a;
     text-decoration: none;
 }
+
+#plchlder-text {
+    display: inline-block;
+}
