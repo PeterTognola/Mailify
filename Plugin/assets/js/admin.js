@@ -69,7 +69,7 @@ var fc = {
         var formPart = document.querySelectorAll("#" + fcContainer + " > .fcFormObj");
         var formParts = {};
 
-        formParts["fcForm" + Math.floor(Math.random() * 9) + 1] = ["formname", "#"];
+        formParts["fcForm" + Math.floor(Math.random() * 9) + 1] = ["formname", _("formdescription").value, _("formsendto").value, _("formforwardto").value];
 
         for (var i = 0; i < formPart.length; i++) {
             var id = i + "-" + Math.floor(Math.random() * (100000000 - 1000)) + 1000;

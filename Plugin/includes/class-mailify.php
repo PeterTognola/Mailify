@@ -351,11 +351,13 @@ class Mailify {
      * @return  void
      */
     public function addAdminPage() {
-        add_shortcode('mailify', 'mailify_tag');
         if (!shortcode_exists('mailify')) {
             echo 'ERROR: Shortcode not enabled, please enable in functions.php.';
         }
-        $this -> addWordpressContactTable();
+        //$this -> addWordpressContactTable();
+        if (isset($_GET['deleteForm']) && file_exists($_GET['deleteForm'])) {
+            unlink($_GET['deleteForm']);
+        }
         if (isset($_GET['createForm'])) { $this -> createAdminPage(); return null; }
         ?>
         <div class="wrap">

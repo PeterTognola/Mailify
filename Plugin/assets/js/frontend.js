@@ -18,11 +18,13 @@ var Mailify = {
 
         var documentAdditions = "";
 
-        var formContent = Object.keys(form).map(function (k) { return form[k] });
+        //var formContent = Object.keys(form).map(function (k) { return form[k] });
+        //var formContent = JSON.stringify(eval("(" + form + ")"));
+        var formContent = form;
 
         for (var id in formContent) {
             if (formContent.hasOwnProperty(id)) {
-            documentAdditions += this.type(formContent[id][0].toLowerCase(), formContent[id][1]);
+                documentAdditions += this.type(id, formContent[id]);
             }
         }
 
@@ -30,7 +32,9 @@ var Mailify = {
     },
 
     type: function (key, object) {
-        switch (object[0]) {
+        switch (object[0].toLowerCase()) {
+            case "text":
+                return "<div><span id=\"" + key + "\">" + object[1] + "</span></div>";
             case "textbox":
                 return "<div><label>" + object[1] + "</label><input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" " + object[2] + " /></div>";
             case "email":
@@ -38,13 +42,20 @@ var Mailify = {
             case "textarea":
                 return "<div><label>" + object[1] + "</label><textarea id=\"" + key + "\" name=\"" + key + "\" " + object[2] + "></textarea></div>";
             case "checkbox":
-                return "<div><input type=\"checkbox\" id=\"" + key + "\" name=\"" + key + "\" /><label>" + object[1] + "</label></div>";
+                return "<div><input type=\"checkbox\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] === "true" ? "checked" : "") + " /><label>" + object[1] + "</label></div>";
+            case "dropbox":
+                var options = "";
+                var optionList = object[1].split(";");
+                for (var i = 0; i < optionList.length; i++) {
+                    options += "<option value=\"" + optionList[i].toLowerCase() + "\">" + optionList[i] + "</option>";
+                }
+                return "<div><select id=\"" + key + "\" name=\"" + key + "\">" + options + "</select></div>";
             case "formName":
                 return "<div><form class=\"mailify\" id=\"" + key + "\" name=\"" + key + "\" method=\"POST\">";
             case "hidden":
                 return "<input type=\"hidden\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" />";
             case "submit":
-                return "<div><input type=\"button\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" onclick=\"Mailify.submit('" + object[2].toString() + "')\" /></div>";
+                return "<div><input type=\"button\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" onclick=\"Mailify.submit('" + object[0].toString() + "')\" /></div>";
             default:
                 return "";
         }
