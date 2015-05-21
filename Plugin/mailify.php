@@ -27,6 +27,7 @@ require_once( 'includes/class-mailify-settings.php' );
 require_once( 'includes/lib/class-mailify-admin-api.php' );
 require_once( 'includes/lib/class-mailify-post-type.php' );
 require_once( 'includes/lib/class-mailify-taxonomy.php' );
+require_once( ABSPATH . WPINC . '/pluggable.php' );
 
 /**
  * Returns the main instance of Mailify to prevent the need to use globals.
@@ -65,6 +66,40 @@ function MailifyForm_Request() {
     exit();
 }
 
+add_action( 'plugins_loaded', 'MailifyForm_Submit', 11 );
+function MailifyForm_Submit() {
+    $keyWord = "_m-";
+    $MailifyForm = $_GET['MailifySubmit'];
+    $loopFormEle = true;
+    $currentFormEle = 0;
+    $defaultEmail = "Chris-Crowther@LicenseDashboard.com"; //todo change to get from the settings...
+    $defaultSubject = "Contact Form"; //todo change to get from the settings...
+    $defaultBody = "There has been an error..."; //todo change to get from the settings...
+    $MailifyBody = "";
+    if (!isset($MailifyForm)) return;
+    
+    $MailifySendTo = isset($_POST[$keyWord . "sendto"]) ? $_POST[$keyWord . "sendto"] : $defaultEmail;
+    $MailifySubject = isset($_POST[$keyWord . "subject"]) ? $_POST[$keyWord . "subject"] : $defaultSubject;
+    
+    $MailifyBody .= "Hello!\n"; //todo replace with header...
+    
+    while ($currentFormEle < 25) { //todo change this approach... Do not do it like this...
+        if (isset($_POST[$keyWord . $currentFormEle])) {
+            $MailifyBody .= $_POST[$keyWord . $currentFormEle] . "\n";
+        }
+        
+        $currentFormEle += 1;
+    }
+    
+    $MailifyBody .= "\n\nGoodbye!"; //todo replace with footer...
+    
+    $result = wp_mail($MailifySendTo, $MailifySubject, $MailifyBody);
+    //echo $MailifySendTo . " - " . $MailifySubject . " - " . $MailifyBody;
+    echo $result == 1 ? "true" : "false";
+    exit();
+}
+
 MailifyForm_Request();
+//MailifyForm_Submit();
 
 ?>

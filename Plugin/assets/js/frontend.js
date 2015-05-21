@@ -28,7 +28,9 @@ var Mailify = {
             }
         }
 
-        document.getElementById(element).innerHTML = documentAdditions + "</form>";
+        this.__(element).innerHTML = documentAdditions + "</form>";
+
+        setTimeout(function() { this.__("mailifyContact-form").style.height = this.__("mailifyContact-form").clientHeight + "px"; }, 150);
     },
 
     type: function (key, object) {
@@ -36,52 +38,70 @@ var Mailify = {
             case "text":
                 return "<div><span id=\"" + key + "\">" + object[1] + "</span></div>";
             case "textbox":
-                return "<div><label>" + object[1] + "</label><input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" " + object[2] + " /></div>";
+                return "<div><label for=\"" + key + "\">" + object[1] + "</label><input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + " /></div>";
             case "email":
-                return "<div><label>" + object[1] + "</label><input type=\"email\" id=\"" + key + "\" name=\"" + key + "\" " + object[2] + " /></div>";
+                return "<div><label for=\"" + key + "\">" + object[1] + "</label><input type=\"email\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + " /></div>";
             case "textarea":
-                return "<div><label>" + object[1] + "</label><textarea id=\"" + key + "\" name=\"" + key + "\" " + object[2] + "></textarea></div>";
+                return "<div><label for=\"" + key + "\">" + object[1] + "</label><textarea id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + "></textarea></div>";
             case "checkbox":
-                return "<div><input type=\"checkbox\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] === "true" ? "checked" : "") + " /><label>" + object[1] + "</label></div>";
+                return "<div><input type=\"checkbox\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] === "true" ? "checked" : "") + " /><label for=\"" + key + "\">" + object[1] + "</label></div>";
             case "dropbox":
                 var options = "";
-                var optionList = object[1].split(";");
+                var optionList = object[3].split(";");
                 for (var i = 0; i < optionList.length; i++) {
                     options += "<option value=\"" + optionList[i].toLowerCase() + "\">" + optionList[i] + "</option>";
                 }
-                return "<div><select id=\"" + key + "\" name=\"" + key + "\">" + options + "</select></div>";
-            case "formName":
-                return "<div><form class=\"mailify\" id=\"" + key + "\" name=\"" + key + "\" method=\"POST\">";
+                return "<div><label for=\"" + key + "\">" + object[1] + "</label><select id=\"" + key + "\" name=\"" + key + "\">" + options + "</select></div>";
+            case "formname":
+
+                return "<div><form class=\"mailify\" id=\"" + key + "\" name=\"" + key + "\" method=\"POST\" onsubmit=\"return Mailify.submit('" + key + "');\">"
+                    + "<input type=\"hidden\" id=\"sendto\" name=\"sendto\" value=\"" + object[2] + "\" />"
+                    + "<input type=\"hidden\" id=\"subject\" name=\"subject\" value=\"" + object[1] + "\" />"
+                    + "<label for=\"location\" style=\"display:none; height:0;\">Location: </label><input type=\"text\" id=\"location\" style=\"display:none; height:0;\" name=\"location\" value=\"" + window.location.href + "\" />";
             case "hidden":
                 return "<input type=\"hidden\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" />";
             case "submit":
-                return "<div><input type=\"button\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" onclick=\"Mailify.submit('" + object[0].toString() + "')\" /></div>";
+                return "<div><input type=\"submit\" class=\"submit\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" /></div>"; //onclick=\"Mailify.submit('" + object[0].toString() + "')\"
             default:
                 return "";
         }
     },
 
     submit: function (id) { //check for errors then initiate submit
-        //check 
+        //check
         var data = new FormData();
 
-        var formInfoCount = document.querySelectorAll("form#" + id + " input");
+        var formInfoCount = document.querySelectorAll("form#" + id + " input, form#" + id + " textarea");
+
+        id = formInfoCount.length;
 
         for (var i = 0; i < formInfoCount.length; i++) {
             var element = formInfoCount[i];
-            data.append(element.id, element.value);
+            if (element.type !== "submit" && element.type !== "hidden") { //todo move to switch
+                data.append("_m-" + i, element.labels[0].innerHTML + ": " + element.value); console.log("_m-" + i + " - " + element.labels[0].innerHTML + ": " + element.value);
+            } else if (element.type === "hidden" && element.value !== null) {
+                data.append("_m-" + element.name, element.value); console.log("_m-" + element.name + " - " + element.value);
+            }
         }
 
         Mailify.deliver(id, data);
+        return false;
     },
 
     deliver: function (id, data) { //submit to server using ajax
-        return Mailify._ajaxAction("send.php?id=" + id, "POST", data, function () { Mailify.delivered(id, Mailify_CurrentData); }); //todo return custom alert box if sent.
+        return Mailify._ajaxAction("?MailifySubmit=true&id=" + id, "POST", data, function () { Mailify.delivered(id, Mailify_CurrentData); }); //todo return custom alert box if sent.
     },
 
     delivered: function (id, result) {
         if (result === "true") {
-            Mailify._alert("Success!", "Your message has been recieved.");
+            //Mailify._alert("Success!", "Your message has been recieved.");
+            
+            this.__("mailifyContact-form").style.opacity = 0;
+            this.__("mailifyContact-form").style.height = "100px";
+            setTimeout(function () {
+                Mailify.__("mailifyContact-form").innerHTML = "<span>Your message has been recieved.</span>";
+                Mailify.__("mailifyContact-form").style.opacity = 1;
+            }, 1000);
         } else {
             Mailify._alert("Ohh Dear...", "There has been an error sending your message, please try again later.");
         }
@@ -92,6 +112,8 @@ var Mailify = {
         var xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function () {
             if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
+                console.log(xmlhttp.responseText);
+
                 Mailify_CurrentData = xmlhttp.responseText;
                 callback(this, Mailify_CurrentData);
             } else if (xmlhttp.status === 404) { //todo finish...
@@ -111,5 +133,9 @@ var Mailify = {
 
     _alert: function (title, text) {
         alert(title + " - " + text); //todo this will do for now.
+    },
+
+    __: function(id) {
+        return document.getElementById(id) || document.getElementsByClassName(id);
     }
 };

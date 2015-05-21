@@ -303,17 +303,17 @@ class Mailify {
      * @since   1.0.0
      * @return  void
      */
-    function mailify_tag( $atts ) {
-        // Attributes
-        extract( shortcode_atts(
-            array(
-                'id' => 'default_value',
-            ), $atts )
-        );
-        echo 'test';
+    //function mailify_tag( $atts ) {
+    //    // Attributes
+    //    extract( shortcode_atts(
+    //        array(
+    //            'id' => 'default_value',
+    //        ), $atts )
+    //    );
+    //    echo 'test';
         
-        return 'test';
-    }
+    //    return 'test';
+    //}
     
     private function addWordpressContactTable() {
         global $wpdb;
@@ -350,13 +350,14 @@ class Mailify {
      * @since   1.0.0
      * @return  void
      */
-    public function addAdminPage() {
+    public function addAdminPage() { //todo this really shouldn't be done like this eg: the textboxes and style being written out in HTML instead of using WordPress' default classes to create forms and styles.
         if (!shortcode_exists('mailify')) {
             echo 'ERROR: Shortcode not enabled, please enable in functions.php.';
         }
         //$this -> addWordpressContactTable();
-        if (isset($_GET['deleteForm']) && file_exists($_GET['deleteForm'])) {
-            unlink($_GET['deleteForm']);
+        if (isset($_GET['deleteForm']) && file_exists(plugin_dir_path( __FILE__ ) . '/forms/' . $_GET['deleteForm'] . '.txt')) {
+            unlink(plugin_dir_path( __FILE__ ) . '/forms/' . $_GET['deleteForm'] . '.txt');
+            //header("location: ?page=mailify-create");
         }
         if (isset($_GET['createForm'])) { $this -> createAdminPage(); return null; }
         ?>
@@ -372,7 +373,7 @@ class Mailify {
                 </form>
                 <table class="form-table">
                     <tbody>
-                    Copy the shortcode from the textboxe's to the right and paste anywhere on a page.
+                    Copy the shortcode from the textbox's to the right and paste anywhere on a page in the WordPress editor.
                     <?php
                         $directory = plugin_dir_path( __FILE__ ) . '/forms/';
                         $scanned_directory = array_diff(scandir($directory), array('..', '.'));
@@ -381,6 +382,7 @@ class Mailify {
                         <tr>
                             <th scope="row"><label for="formname"><?php echo explode(".", $value)[0]; ?></label></th>
                             <td><input type="text"  value='[mailify id="<?php echo explode(".", $value)[0]; ?>"]' class="regular-text" /></td>
+                            <td><a href="#delete" onclick='if (confirm("Are you sure you want to delete this form?")) { location = window.location.origin + window.location.pathname + window.location.search + "&deleteForm=<?php echo explode(".", $value)[0]; ?>"; }'>Delete</a></td>
                         </tr>
                             <?php
                         }

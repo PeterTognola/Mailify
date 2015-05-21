@@ -14,10 +14,12 @@ var fc = {
         _(fcContainer).addEventListener("click", fc.editObjDelete);
     },
 
-    object: function (obj, name, required) {
+    object: function (obj, name, required, extra) {
         var details = "";
         if (obj && name) {
-            details = "<input type=\"hidden\" value=\"" + obj + "\" class=\"detail_obj\" /><input type=\"hidden\" value=\"" + (name.length < 1 ? "_" : name) + "\" class=\"detail_name\" /><input type=\"hidden\" value=\"" + required + "\" class=\"detail_required\" />";
+            details = "<input type=\"hidden\" value=\"" + obj + "\" class=\"detail_obj\" /><input type=\"hidden\" value=\""
+                + (name.length < 1 ? "_" : name) + "\" class=\"detail_name\" /><input type=\"hidden\" value=\"" + required
+                + "\" class=\"detail_required\" />" + (extra !== undefined ? "<input type=\"hidden\" value=\"" + extra + "\" class=\"detail_extra\" />" : "");
         }
         switch (obj) {
             case "text":
@@ -31,7 +33,7 @@ var fc = {
             case "checkbox":
                 return details + "<input " + fcInputAttr + " type=\"checkbox\" /><label " + fcLabelAttr + ">" + name + "</label>";
             case "dropbox":
-                return details + "[Dropbox]";
+                return details + extra + "[Dropbox]";
             case "recaptcha":
                 return details + "[reCaptcha will appear here]";
             case "submit":
@@ -45,7 +47,11 @@ var fc = {
     createObj: function () {
         if (fcRun === false) return;
 
-        fc.addObj(fc.object(_("objects").options[_("objects").selectedIndex].value, _("label").value, _("required").checked));
+        if (_("objects").options[_("objects").selectedIndex].value === "dropbox") {
+            fc.addObj(fc.object(_("objects").options[_("objects").selectedIndex].value, _("label").value, _("required").checked, _("text").value));
+        } else {
+            fc.addObj(fc.object(_("objects").options[_("objects").selectedIndex].value, _("label").value, _("required").checked));
+        }
     },
 
     addObj: function (object) {
@@ -80,7 +86,11 @@ var fc = {
 
             console.log(formPart.length + " - " + i);
 
-            formParts[id] = [formPart[i].querySelector(".detail_obj").value, formPart[i].querySelector(".detail_name").value, formPart[i].querySelector(".detail_required").value];
+            if (formPart[i].querySelector(".detail_extra")) {
+                formParts[id] = [formPart[i].querySelector(".detail_obj").value, formPart[i].querySelector(".detail_name").value, formPart[i].querySelector(".detail_required").value, formPart[i].querySelector(".detail_extra").value];
+            } else {
+                formParts[id] = [formPart[i].querySelector(".detail_obj").value, formPart[i].querySelector(".detail_name").value, formPart[i].querySelector(".detail_required").value];
+            }
         }
 
         //formParts.forEach(function(obj) {
@@ -101,7 +111,7 @@ var fc = {
     switchEle: function () {
         switch (_("objects").options[_("objects").selectedIndex].value) {
             case "dropbox":
-                _("plchlder-text").innerHTML = "<textarea id=\"label\" name=\"label\">placeholder;example text;</textarea>";
+                _("plchlder-text").innerHTML = "<input type=\"text\" placeholder=\"label\" id=\"label\" name=\"label\" /><textarea id=\"text\" name=\"text\">placeholder;example text;</textarea>";
                 break;
             default:
                 _("plchlder-text").innerHTML = "<input type=\"text\" placeholder=\"label\" id=\"label\" name=\"label\" />";
