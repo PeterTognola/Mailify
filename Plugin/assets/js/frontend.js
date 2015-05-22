@@ -30,7 +30,7 @@ var Mailify = {
 
         this.__(element).innerHTML = documentAdditions + "</form>";
 
-        setTimeout(function() { this.__("mailifyContact-form").style.height = this.__("mailifyContact-form").clientHeight + "px"; }, 150);
+        setTimeout(function () { Mailify.__("mailifyContact-form").style.height = Mailify.__("mailifyContact-form").clientHeight + "px"; }, 150);
     },
 
     type: function (key, object) {
@@ -54,7 +54,7 @@ var Mailify = {
                 return "<div><label for=\"" + key + "\">" + object[1] + "</label><select id=\"" + key + "\" name=\"" + key + "\">" + options + "</select></div>";
             case "formname":
 
-                return "<div><form class=\"mailify\" id=\"" + key + "\" name=\"" + key + "\" method=\"POST\" onsubmit=\"return Mailify.submit('" + key + "');\">"
+                return "<div><form class=\"mailify\" id=\"" + key + "\" name=\"" + key + "\" method=\"POST\" onsubmit=\"return Mailify.submit('" + key + "', '" + object[3] + "');\">"
                     + "<input type=\"hidden\" id=\"sendto\" name=\"sendto\" value=\"" + object[2] + "\" />"
                     + "<input type=\"hidden\" id=\"subject\" name=\"subject\" value=\"" + object[1] + "\" />"
                     + "<label for=\"location\" style=\"display:none; height:0;\">Location: </label><input type=\"text\" id=\"location\" style=\"display:none; height:0;\" name=\"location\" value=\"" + window.location.href + "\" />";
@@ -67,7 +67,7 @@ var Mailify = {
         }
     },
 
-    submit: function (id) { //check for errors then initiate submit
+    submit: function (id, url) { //check for errors then initiate submit
         //check
         var data = new FormData();
 
@@ -84,20 +84,23 @@ var Mailify = {
             }
         }
 
-        Mailify.deliver(id, data);
+        Mailify.deliver(id, data, url);
         return false;
     },
 
-    deliver: function (id, data) { //submit to server using ajax
-        return Mailify._ajaxAction("?MailifySubmit=true&id=" + id, "POST", data, function () { Mailify.delivered(id, Mailify_CurrentData); }); //todo return custom alert box if sent.
+    deliver: function (id, data, url) { //submit to server using ajax
+        return Mailify._ajaxAction("?MailifySubmit=true&id=" + id, "POST", data, function () { Mailify.delivered(id, Mailify_CurrentData, url); }); //todo return custom alert box if sent.
     },
 
-    delivered: function (id, result) {
+    delivered: function (id, result, url) {
         if (result === "true") {
             //Mailify._alert("Success!", "Your message has been recieved.");
             
             this.__("mailifyContact-form").style.opacity = 0;
             this.__("mailifyContact-form").style.height = "100px";
+            if (url !== null && url !== undefined) {
+                window.location = url;
+            }
             setTimeout(function () {
                 Mailify.__("mailifyContact-form").innerHTML = "<span>Your message has been recieved.</span>";
                 Mailify.__("mailifyContact-form").style.opacity = 1;
@@ -136,6 +139,6 @@ var Mailify = {
     },
 
     __: function(id) {
-        return document.getElementById(id) || document.getElementsByClassName(id);
+        return document.getElementById(id) || document.querySelectorAll("." + id.replace(" ", " ."));
     }
 };
