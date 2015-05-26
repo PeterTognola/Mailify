@@ -53,7 +53,6 @@ var Mailify = {
                 }
                 return "<div><label for=\"" + key + "\">" + object[1] + "</label><select id=\"" + key + "\" name=\"" + key + "\">" + options + "</select></div>";
             case "formname":
-
                 return "<div><form class=\"mailify\" id=\"" + key + "\" name=\"" + key + "\" method=\"POST\" onsubmit=\"return Mailify.submit('" + key + "', '" + object[3] + "');\">"
                     + "<input type=\"hidden\" id=\"sendto\" name=\"sendto\" value=\"" + object[2] + "\" />"
                     + "<input type=\"hidden\" id=\"subject\" name=\"subject\" value=\"" + object[1] + "\" />"
@@ -75,10 +74,12 @@ var Mailify = {
 
         id = formInfoCount.length;
 
-        for (var i = 0; i < formInfoCount.length; i++) {
+        for (var i = 0; i < formInfoCount.length; i++) { //todo move to switch.
             var element = formInfoCount[i];
             if (element.type !== "submit" && element.type !== "hidden") { //todo move to switch
                 data.append("_m-" + i, element.labels[0].innerHTML + ": " + element.value); console.log("_m-" + i + " - " + element.labels[0].innerHTML + ": " + element.value);
+            } else if (element.type === "checkbox") {
+                data.append("_m-" + element.name, element.checked ? "Yes" : "No"); console.log("_m-" + element.name + " - " + element.checked);
             } else if (element.type === "hidden" && element.value !== null) {
                 data.append("_m-" + element.name, element.value); console.log("_m-" + element.name + " - " + element.value);
             }
