@@ -88,18 +88,7 @@
                     formParts[id] = [formPart[i].querySelector(".detail_obj").value, formPart[i].querySelector(".detail_name").value];
                 }
 
-                //formParts.forEach(function(obj) {
-                //    anotherParts.unshift(obj);
-                //});
-
-                //var a = Object.keys(formParts).sort().reverse();
-
-                //for (var o = 0; o < a.length; o++) {
-                //    anotherParts[a[o]] = formParts[a[o]];
-                //}
-
-                //document.body.innerHTML = "<textarea class=\"full\">" + JSON.stringify(formParts) + "</textarea>";
-                _('formcode').innerHTML = JSON.stringify(formParts);
+                _("formcode").innerHTML = JSON.stringify(formParts);
             },
 
             switchEle: function () {

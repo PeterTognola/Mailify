@@ -96,7 +96,10 @@ class Mailify {
 
         register_activation_hook( $this->file, array( $this, 'install' ) );
         register_activation_hook($this->file, array($this, 'addWordpressContactTable'));
-
+        
+        // Load altern scripts
+        add_action( 'wp_enqueue_scripts', array( $this, 'altern_scripts') );
+        
         // Load frontend JS & CSS
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 10 );
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
@@ -117,6 +120,14 @@ class Mailify {
         $this->load_plugin_textdomain();
         add_action( 'init', array( $this, 'load_localisation' ), 0 );
     } // End __construct ()
+    
+    public function altern_scripts()
+    {
+        //All import files go here for plugin frontend.
+        wp_register_script( 'custom-script', 'https://www.google.com/recaptcha/api.js', array(), null, false );
+        //Loading of scripts
+        wp_enqueue_script( 'custom-script' );
+    }
 
     /**
      * Wrapper function to register a new post type
@@ -332,7 +343,7 @@ class Mailify {
         dbDelta( $sql );
     }
     
-    private function insertWordpressContactForm($name, $data) {
+    private function insertWordpressContactForm($name, $data) { //todo not needed
         global $wpdb;
         
         //$table_name = $wpdb -> prefix . 'mailify';

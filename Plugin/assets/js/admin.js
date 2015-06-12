@@ -21,11 +21,14 @@ var fc = {
                 + (name.length < 1 ? "_" : name) + "\" class=\"detail_name\" /><input type=\"hidden\" value=\"" + required
                 + "\" class=\"detail_required\" />" + (extra !== undefined ? "<input type=\"hidden\" value=\"" + extra + "\" class=\"detail_extra\" />" : "");
         }
+
         switch (obj) {
             case "text":
                 return details + "<span " + fcInputAttr + ">" + name + "</span>";
             case "textbox":
                 return details + "<label " + fcLabelAttr + ">" + name + "</label><input " + fcInputAttr + " type=\"text\" />";
+            case "number":
+                return details + "<label " + fcLabelAttr + ">" + name + "</label><input " + fcInputAttr + " type=\"number\" />";
             case "email":
                 return details + "<label " + fcLabelAttr + ">" + name + "</label><input " + fcInputAttr + " type=\"email\" />";
             case "textarea":
@@ -93,17 +96,6 @@ var fc = {
             }
         }
 
-        //formParts.forEach(function(obj) {
-        //    anotherParts.unshift(obj);
-        //});
-
-        //var a = Object.keys(formParts).sort().reverse();
-
-        //for (var o = 0; o < a.length; o++) {
-        //    anotherParts[a[o]] = formParts[a[o]];
-        //}
-
-        //document.body.innerHTML = "<textarea class=\"full\">" + JSON.stringify(formParts) + "</textarea>";
         console.log(formParts);
         _("formcode").innerHTML = JSON.stringify(formParts);
     },

@@ -65,41 +65,81 @@ function MailifyForm_Request() {
     }
     exit();
 }
-
+/**
+ * Echo's if submition of form was correct and sends email to proposed person.
+ *
+ * @since  1.0.0
+ * @return object MailifyForm_Submit
+ */
 add_action( 'plugins_loaded', 'MailifyForm_Submit', 11 );
-function MailifyForm_Submit() {
+function MailifyForm_Submit() { //todo check for foul play.
     $keyWord = "_m-";
     $MailifyForm = $_GET['MailifySubmit'];
     $loopFormEle = true;
     $currentFormEle = 0;
-    $defaultEmail = "Chris-Crowther@LicenseDashboard.com"; //todo change to get from the settings...
+    $defaultEmail = "web-requests@phoenixs.co.uk"; //todo change to get from the settings...
     $defaultSubject = "Contact Form"; //todo change to get from the settings...
     $defaultBody = "There has been an error..."; //todo change to get from the settings...
     $MailifyBody = "";
     if (!isset($MailifyForm)) return;
     
-    $MailifySendTo = isset($_POST[$keyWord . "sendto"]) ? $_POST[$keyWord . "sendto"] : $defaultEmail;
+    //$MailifySendTo = isset($_POST[$keyWord . "sendto"]) ? $_POST[$keyWord . "sendto"] : $defaultEmail; //this isn't safe. todo get from text file.
+    
+    $captcha;
+    if(isset($_POST['g-recaptcha-response'])) {
+        $captcha=$_POST['g-recaptcha-response'];
+    }
+
+    if(!$captcha) {
+        echo 'Please complete the full form, including the reCaptcha field.';
+        exit;
+    }
+    
+    $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LeQFAgTAAAAAJbJ3pXcvZlwwJL7bV62PuTlQwDy&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
+    
+    if($response['success'] == false) {
+        echo 'Please complete the form.';
+        exit();
+    }
+    
+    $subEmail = explode(";", $_POST[$keyWord . 'sendto'] . ';');
+    
+    foreach($subEmail as $email) {
+        if ($email === "") continue;
+        
+        if ($_POST[$keyWord . 'sendto'] == "seminars@phoenixs.co.uk" || $_POST[$keyWord . 'sendto'] == "subscriptions@phoenixs.co.uk" || $_POST[$keyWord . 'sendto'] == "info@phoenixs.co.uk" || $_POST[$keyWord . 'sendto'] == "web-requests@phoenixs.co.uk") {
+            $MailifySendTo .= $_POST[$keyWord . 'sendto'] . ";";
+        } else {
+            $MailifySendTo .= $_POST[$keyWord . 'sendto'] . ";";
+        }
+    }
+    
+    //todo remove if statement.
+    
+    $MailifySendTo = explode(";", $MailifySendTo);
+    
+    //$MailifySendTo = $defaultEmail; //todo get sendto from file!
+    
     $MailifySubject = isset($_POST[$keyWord . "subject"]) ? $_POST[$keyWord . "subject"] : $defaultSubject;
     
-    $MailifyBody .= "Hello!\n"; //todo replace with header...
+    $MailifyBody .= "The following information has been submitted via the Phoenix Software website:\n"; //todo replace with header...
     
     while ($currentFormEle < 25) { //todo change this approach... Do not do it like this...
         if (isset($_POST[$keyWord . $currentFormEle])) {
-            $MailifyBody .= $_POST[$keyWord . $currentFormEle] . "\n";
+            $MailifyBody .= $_POST[$keyWord . $currentFormEle] . "\n\n";
         }
         
         $currentFormEle += 1;
     }
     
-    $MailifyBody .= "\n\nGoodbye!"; //todo replace with footer...
+    //$MailifyBody .= "\n\nGoodbye!"; //replace with footer from settings...
     
     $result = wp_mail($MailifySendTo, $MailifySubject, $MailifyBody);
-    //echo $MailifySendTo . " - " . $MailifySubject . " - " . $MailifyBody;
+    //$result = wp_mail("james-tognola@phoenixs.co.uk", $MailifySubject, $MailifyBody); For testing.
     echo $result == 1 ? "true" : "false";
     exit();
 }
 
 MailifyForm_Request();
-//MailifyForm_Submit();
 
 ?>

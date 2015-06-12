@@ -37,6 +37,7 @@
                             <select id="objects" onchange=" fc.switchEle(); " name="objects">
                                 <option value="text">text</option>
                                 <option value="textbox">textbox</option>
+                                <option value="number">number</option>
                                 <option value="email">email</option>
                                 <option value="textarea">textarea</option>
                                 <option value="checkbox">checkbox</option>
