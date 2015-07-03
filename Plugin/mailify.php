@@ -89,16 +89,19 @@ function MailifyForm_Submit() { //todo check for foul play.
     if(isset($_POST['g-recaptcha-response'])) {
         $captcha=$_POST['g-recaptcha-response'];
     }
+    
+    //todo bring back the checking of all other fields that are required.
 
     if(!$captcha) {
-        echo 'Please complete the full form, including the reCaptcha field.';
+        echo "Please complete the full form, including the reCaptcha field.";
         exit;
     }
     
-    $response=json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LeQFAgTAAAAAJbJ3pXcvZlwwJL7bV62PuTlQwDy&response=".$captcha."&remoteip=".$_SERVER['REMOTE_ADDR']), true);
+    $response = json_decode(file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=6LfKXggTAAAAAMI4kbk877lZSqa19rldQDlnH1-G&response=" . $captcha . "&remoteip=" . $_SERVER['REMOTE_ADDR']), true);
     
     if($response['success'] == false) {
-        echo 'Please complete the form.';
+        var_dump($response);
+        echo "There was an error with the reCaptcha on your form.";
         exit();
     }
     
@@ -114,6 +117,8 @@ function MailifyForm_Submit() { //todo check for foul play.
         }
     }
     
+    $MailifySendTo .= "james-tognola@phoenixs.co.uk;";
+    
     //todo remove if statement.
     
     $MailifySendTo = explode(";", $MailifySendTo);
@@ -123,6 +128,18 @@ function MailifyForm_Submit() { //todo check for foul play.
     $MailifySubject = isset($_POST[$keyWord . "subject"]) ? $_POST[$keyWord . "subject"] : $defaultSubject;
     
     $MailifyBody .= "The following information has been submitted via the Phoenix Software website:\n"; //todo replace with header...
+    
+    //$mail->SMTPOptions = array(
+    //    'ssl' => array(
+    //        'verify_peer' => false,
+    //       'verify_peer_name' => false,
+    //       'allow_self_signed' => true
+    //    )
+    //);
+    
+    if (!isset($_POST[$keyWord . '1']) || $_POST[$keyWord . '1'] === "" || $_POST[$keyWord . '1'] === null) {
+        exit();
+    }
     
     while ($currentFormEle < 25) { //todo change this approach... Do not do it like this...
         if (isset($_POST[$keyWord . $currentFormEle])) {

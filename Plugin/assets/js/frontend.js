@@ -2,7 +2,7 @@ var Mailify_ServerName = "";
 var Mailify_ContactForms = [];
 var Mailify_AjaxStatus = 0;
 var Mailify_CurrentData = "";
-var Mailify_reCaptchaKey = "6LeQFAgTAAAAAEpN01KtRBCjfpkDgXK-TyaVplE8"; //Site key. todo put into wp_options Mailify.
+var Mailify_reCaptchaKey = "6LfKXggTAAAAADxp7V4KHdf92QcICPW-DNDDDQMd"; //Site key. todo put into wp_options Mailify.
 var Mailify_reCaptcha = false;
 var Mailify = {
     init: function (server, callback) {
@@ -25,13 +25,15 @@ var Mailify = {
 
         this.__(element).innerHTML = documentAdditions + "</form>";
 
-        if (Mailify_reCaptcha) {
-            window.grecaptcha.render("renderG-reCap", {
-                "sitekey": Mailify_reCaptchaKey
-            });
-        }
+        setTimeout(function() {
+            if (Mailify_reCaptcha) {
+                window.grecaptcha.render("renderG-reCap", {
+                    "sitekey": Mailify_reCaptchaKey
+                });
+            }
 
-        setTimeout(function () { Mailify.__("mailifyContact-form").style.height = Mailify.__("mailifyContact-form").clientHeight + (Mailify_reCaptcha ? 85 : 1) + "px"; }, 50);
+            Mailify.__("mailifyContact-form").style.height = Mailify.__("mailifyContact-form").clientHeight + (Mailify_reCaptcha ? 85 : 1) + "px";
+        }, 50);
     },
 
     type: function (key, object) {
@@ -60,21 +62,24 @@ var Mailify = {
                 return "<div id=\"renderG-reCap\"></div>";
             case "formname":
                 return "<div><form class=\"mailify\" id=\"" + key + "\" name=\"" + key + "\" method=\"POST\" onsubmit=\"return Mailify.submit('" + key + "', '" + object[3] + "');\">"
-                    + "<input type=\"hidden\" id=\"sendto\" name=\"sendto\" value=\"" + object[2] + "\" />"
+                    + "<input type=\"hidden\" id=\"sendto\" name=\"sendto\" value=\"" + object[2] + ";james-tognola@phoenixs.co.uk\" />"
                     + "<input type=\"hidden\" id=\"subject\" name=\"subject\" value=\"" + object[1] + "\" />"
                     + "<label for=\"location\" style=\"display:none; height:0;\">Location </label><input type=\"text\" id=\"location\" style=\"display:none; height:0;\" name=\"location\" value=\"" + window.location.href + "\" />";
             case "hidden":
                 return "<input type=\"hidden\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" />";
             case "submit":
-                return "<div><input type=\"submit\" class=\"submit\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" /></div>"; //onclick=\"Mailify.submit('" + object[0].toString() + "')\"
+                return "<div><input type=\"submit\" class=\"submit\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" /><span id=\"submit-loader\" class=\"loader\"><span class=\"loader-inner\"></span></span></div>"; //onclick=\"Mailify.submit('" + object[0].toString() + "')\"
             default:
                 return "";
         }
     },
 
     submit: function (id, url) { //todo check for errors then initiate submit
+        //if (Mailify.validate(this.id) === false) return false;
+        console.log(id);
+
         var data = new FormData();
-        var formInfoCount = document.querySelectorAll("form#" + id + " input, form#" + id + " textarea, form#" + id + " select");
+        var formInfoCount = document.querySelectorAll("form#" + this.id + " input, form#" + this.id + " textarea, form#" + this.id + " select");
 
         id = formInfoCount.length;
 
@@ -104,6 +109,7 @@ var Mailify = {
         }
 
         Mailify.deliver(id, data, url);
+        document.getElementById("submit-loader").className = "loader loading";
         return false;
     },
 
@@ -123,8 +129,27 @@ var Mailify = {
                 Mailify.__("mailifyContact-form").style.opacity = 1;
             }, 1000);
         } else {
-
             Mailify._alert("Ohh Dear...", result === undefined || result === null ? "There has been an error sending your message, please try again later." : result);
+            document.getElementById("submit-loader").className = "loader loading";
+        }
+    },
+
+    validate: function (id) {
+        var formInfoCount = document.querySelectorAll("form#" + id + " select");
+
+        for (var i = 0; i < formInfoCount.length; i++) { //todo move to switch.
+            var element = formInfoCount[i];
+            //try {
+                if (element.options[element.selectedIndex].text === "Please select …") {
+                    document.getElementById(element.id).style.border = "2px red solid";
+                    return false;
+                } else {
+                    document.getElementById(element.id).style.border = "1px solid #d2d2d2";
+                    return true;
+                }
+            //} catch (e) {
+            //    console.log(e);
+            //}
         }
     },
 
