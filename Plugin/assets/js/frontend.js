@@ -25,12 +25,8 @@ var Mailify = {
 
         this.__(element).innerHTML = documentAdditions + "</form>";
 
-        setTimeout(function() {
-            if (Mailify_reCaptcha) {
-                window.grecaptcha.render("renderG-reCap", {
-                    "sitekey": Mailify_reCaptchaKey
-                });
-            }
+        setTimeout(function () {
+            Mailify._recaptchaCall();
 
             Mailify.__("mailifyContact-form").style.height = Mailify.__("mailifyContact-form").clientHeight + (Mailify_reCaptcha ? 85 : 1) + "px";
         }, 50);
@@ -41,30 +37,30 @@ var Mailify = {
             case "text":
                 return "<div><span class=\"header-text\" id=\"" + key + "\">" + object[1] + "</span></div>";
             case "textbox":
-                return "<div><label for=\"" + key + "\">" + object[1] + "</label><input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + " /></div>";
+                return "<div><label for=\"" + key + "\" id=\"" + key + "-l\">" + object[1] + "</label><input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + " /></div>";
             case "number": /* todo: dirty so remove */
-                return "<div><label for=\"" + key + "\">" + object[1] + "</label><input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + " onkeypress=\"return event.charCode >= 48 && event.charCode <= 57\" /></div"
+                return "<div><label for=\"" + key + "\" id=\"" + key + "-l\">" + object[1] + "</label><input type=\"text\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + " onkeypress=\"return event.charCode >= 48 && event.charCode <= 57\" /></div";
             case "email":
-                return "<div><label for=\"" + key + "\">" + object[1] + "</label><input type=\"email\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + " /></div>";
+                return "<div><label for=\"" + key + "\" id=\"" + key + "-l\">" + object[1] + "</label><input type=\"email\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + " /></div>";
             case "textarea":
-                return "<div><label for=\"" + key + "\">" + object[1] + "</label><textarea id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + "></textarea></div>";
+                return "<div><label for=\"" + key + "\" id=\"" + key + "-l\">" + object[1] + "</label><textarea id=\"" + key + "\" name=\"" + key + "\" " + (object[2] ? "required" : "") + "></textarea></div>";
             case "checkbox":
-                return "<div><input type=\"checkbox\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] === "true" ? "checked" : "") + " /><label for=\"" + key + "\">" + object[1] + "</label></div>";
+                return "<div><input type=\"checkbox\" id=\"" + key + "\" name=\"" + key + "\" " + (object[2] === "true" ? "checked" : "") + " /><label for=\"" + key + "\" id=\"" + key + "-l\">" + object[1] + "</label></div>";
             case "dropbox":
                 var options = "";
                 var optionList = object[3].split(";");
                 for (var i = 0; i < optionList.length; i++) {
                     options += "<option value=\"" + optionList[i].toLowerCase() + "\">" + optionList[i] + "</option>";
                 }
-                return "<div><label for=\"" + key + "\">" + object[1] + "</label><select id=\"" + key + "\" name=\"" + key + "\">" + options + "</select></div>";
+                return "<div><label for=\"" + key + "\" id=\"" + key + "-l\">" + object[1] + "</label><select id=\"" + key + "\" name=\"" + key + "\">" + options + "</select></div>";
             case "recaptcha":
                 Mailify_reCaptcha = true;
                 return "<div id=\"renderG-reCap\"></div>";
             case "formname":
                 return "<div><form class=\"mailify\" id=\"" + key + "\" name=\"" + key + "\" method=\"POST\" onsubmit=\"return Mailify.submit('" + key + "', '" + object[3] + "');\">"
-                    + "<input type=\"hidden\" id=\"sendto\" name=\"sendto\" value=\"" + object[2] + ";james-tognola@phoenixs.co.uk\" />"
+                    + "<input type=\"hidden\" id=\"sendto\" name=\"sendto\" value=\"" + object[2] + "\" />"
                     + "<input type=\"hidden\" id=\"subject\" name=\"subject\" value=\"" + object[1] + "\" />"
-                    + "<label for=\"location\" style=\"display:none; height:0;\">Location </label><input type=\"text\" id=\"location\" style=\"display:none; height:0;\" name=\"location\" value=\"" + window.location.href + "\" />";
+                    + "<label for=\"location\" style=\"display:none; height:0;\" id=\"location-l\">Location </label><input type=\"text\" id=\"location\" style=\"display:none; height:0;\" name=\"location\" value=\"" + window.location.href + "\" />";
             case "hidden":
                 return "<input type=\"hidden\" id=\"" + key + "\" name=\"" + key + "\" value=\"" + object[1].toString() + "\" />";
             case "submit":
@@ -75,33 +71,32 @@ var Mailify = {
     },
 
     submit: function (id, url) { //todo check for errors then initiate submit
-        //if (Mailify.validate(this.id) === false) return false;
-        console.log(id);
+        if (Mailify.validate(id) === false) return false;
 
         var data = new FormData();
-        var formInfoCount = document.querySelectorAll("form#" + this.id + " input, form#" + this.id + " textarea, form#" + this.id + " select");
+        var formInfoCount = document.querySelectorAll("form#" + id + " input, form#" + id + " textarea, form#" + id + " select");
 
         id = formInfoCount.length;
 
         for (var i = 0; i < formInfoCount.length; i++) { //todo move to switch.
-            var element = formInfoCount[i];
+            var element = formInfoCount[i].getAttribute("id") || formInfoCount[i].id;
             try {
-                if (element.type !== "submit" && element.type !== "hidden" && element.type !== "checkbox") { //todo move to switch
-                    if (element.className === "g-recaptcha-response") {
-                        data.append("g-recaptcha-response", "" + element.value);
+                if (formInfoCount[i].type !== "submit" && formInfoCount[i].type !== "hidden" && formInfoCount[i].type !== "checkbox") { //todo move to switch
+                    if (formInfoCount[i].className === "g-recaptcha-response") {
+                        data.append("g-recaptcha-response", "" + formInfoCount[i].value);
                         break;
                     }
-                    data.append("_m-" + i, element.labels[0].innerHTML + ": " + element.value);
-                    console.log("_m-" + i + " - " + element.labels[0].innerHTML + ": " + element.value);
-                } else if (element.type === "checkbox") {
-                    data.append("_m-" + i, element.labels[0].innerHTML + ": " + (element.checked ? "Yes" : "No"));
-                    console.log("_m-" + i + " - " + element.checked);
-                } else if (element.type === "hidden" && element.value !== null) {
-                    data.append("_m-" + element.name, element.value);
-                    console.log("_m-" + element.name + " - " + element.value);
-                } else if (element.type === "select-one") {
-                    data.append("_m-" + element.name, element.options[element.selectedIndex].text);
-                    console.log("_m-" + element.name + " - " + element.options[element.selectedIndex].text);
+                    data.append("_m-" + i, __(formInfoCount[i].id + "-l").innerHTML + ": " + formInfoCount[i].value);
+                    console.log("_m-" + i + " - " + __(formInfoCount[i].id + "-l").innerHTML + ": " + formInfoCount[i].value);
+                } else if (formInfoCount[i].type === "checkbox") {
+                    data.append("_m-" + i, __(formInfoCount[i].id + "-l").innerHTML + ": " + (formInfoCount[i].checked ? "Yes" : "No"));
+                    console.log("_m-" + i + " - " + formInfoCount[i].checked);
+                } else if (formInfoCount[i].type === "hidden" && formInfoCount[i].value !== null) {
+                    data.append("_m-" + formInfoCount[i].name, formInfoCount[i].value);
+                    console.log("_m-" + formInfoCount[i].name + " - " + formInfoCount[i].value);
+                } else if (formInfoCount[i].type === "select-one") {
+                    data.append("_m-" + formInfoCount[i].name, formInfoCount[i].options[formInfoCount[i].selectedIndex].text);
+                    console.log("_m-" + formInfoCount[i].name + " - " + formInfoCount[i].options[formInfoCount[i].selectedIndex].text);
                 }
             } catch (e) {
                 console.log(e);
@@ -110,7 +105,8 @@ var Mailify = {
 
         Mailify.deliver(id, data, url);
         document.getElementById("submit-loader").className = "loader loading";
-        return false;
+
+        return false; //so the action is not commited.
     },
 
     deliver: function (id, data, url) {
@@ -130,27 +126,26 @@ var Mailify = {
             }, 1000);
         } else {
             Mailify._alert("Ohh Dear...", result === undefined || result === null ? "There has been an error sending your message, please try again later." : result);
-            document.getElementById("submit-loader").className = "loader loading";
+            document.getElementById("submit-loader").className = "loader";
+            Mailify._recaptchaCall();
         }
     },
 
     validate: function (id) {
         var formInfoCount = document.querySelectorAll("form#" + id + " select");
 
-        for (var i = 0; i < formInfoCount.length; i++) { //todo move to switch.
+        for (var i = 0; i < formInfoCount.length; i++) {
             var element = formInfoCount[i];
-            //try {
-                if (element.options[element.selectedIndex].text === "Please select …") {
-                    document.getElementById(element.id).style.border = "2px red solid";
-                    return false;
-                } else {
-                    document.getElementById(element.id).style.border = "1px solid #d2d2d2";
-                    return true;
-                }
-            //} catch (e) {
-            //    console.log(e);
-            //}
+            if (element.options[element.selectedIndex].text === "Please select …") {
+                document.getElementById(element.id).style.border = "2px red solid";
+                return false;
+            }
+
+            document.getElementById(element.id).style.border = "1px solid #d2d2d2";
+            return true;
         }
+
+        return true;
     },
 
     _ajaxAction: function (url, method, data, callback) {
@@ -172,6 +167,14 @@ var Mailify = {
         return "";
     },
 
+    _recaptchaCall: function() {
+        if (Mailify_reCaptcha) {
+            window.grecaptcha.render("renderG-reCap", {
+                "sitekey": Mailify_reCaptchaKey
+            });
+        }
+    },
+
     _pushRequest: function (string) {
         Mailify_ContactForms.push(string);
         return string;
@@ -185,3 +188,7 @@ var Mailify = {
         return document.getElementById(id) || document.querySelectorAll("." + id.replace(" ", " ."));
     }
 };
+
+function __(id) {
+    return document.getElementById(id) || document.querySelectorAll("." + id.replace(" ", " ."));
+}
